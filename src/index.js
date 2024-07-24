@@ -32,7 +32,7 @@ function isDateWithinThisMonthAndYear(date) {
   ];
 }
 
-function allowEntry(name, type) {
+export function allowEntry(name, type) {
   if (!type || !name) return false;
   if (!type.includes("Purchase")) return false;
   if (!type.includes("Refund")) return false;

@@ -1,4 +1,6 @@
 {
+  "name": "steam-purchase-history",
+  "type": "module",
   "scripts": {
     "test": "jest"
   },

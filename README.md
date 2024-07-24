@@ -11,5 +11,5 @@ ph
 Run the following in a terminal
 
 ```bash
-npm test
+npm run test
 ```

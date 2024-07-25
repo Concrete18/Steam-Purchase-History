@@ -135,13 +135,7 @@ function getPurchaseHistory() {
       if (total) total = parseFloat(total);
       if (allowEntry(name, type)) {
         let games = name.replace("\nRefund", "").split("\n");
-        if (games.length > 1) {
-          console.log(games);
-        }
         games = removeNonGames(games);
-        if (games.length > 1) {
-          console.log(games);
-        }
         // removes non game names if gift was sent
         purchaseHistory.push({
           date,
@@ -292,7 +286,6 @@ function addDownloadPurchaseHistoryButton() {
   const newButton = document.createElement("button");
   newButton.addEventListener("click", () => {
     let purchaseHistory = getPurchaseHistory();
-    console.log(purchaseHistory);
     downloadAsJSON(purchaseHistory);
   });
   newButton.textContent = "Download Purchase History";

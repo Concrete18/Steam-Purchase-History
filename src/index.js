@@ -32,7 +32,7 @@ function isDateWithinThisMonthAndYear(date) {
   ];
 }
 
-function allowEntry(name, type) {
+export function allowEntry(name, type) {
   if (!type || !name) return false;
   const allowedTypes = ["Purchase", "Refund", "Gift Purchase"];
   if (!allowedTypes.includes(type)) return false;
@@ -114,7 +114,7 @@ function getElementsWithSingleClass(className) {
   return null;
 }
 
-function removeNonGames(games) {
+export function removeNonGames(games) {
   const removeIfPresent = ["View Shipment Details", "Gift sent to"];
   return games.filter(
     (item) => !removeIfPresent.some((substring) => item.includes(substring))

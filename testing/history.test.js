@@ -1,4 +1,9 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { allowEntry, removeNonGames } from "../src/index";
+
 // const allowEntry = require("../src/index.mjs");
 
 // function allowEntry(name, type) {

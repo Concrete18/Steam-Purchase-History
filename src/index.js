@@ -32,10 +32,11 @@ function isDateWithinThisMonthAndYear(date) {
   ];
 }
 
-export function allowEntry(name, type) {
+function allowEntry(name, type) {
   if (!type || !name) return false;
-  if (!type.includes("Purchase")) return false;
-  if (!type.includes("Refund")) return false;
+  const allowedTypes = ["Purchase", "Refund", "Gift Purchase"];
+  if (!allowedTypes.includes(type)) return false;
+  // ignored due to funds being used later
   if (name.includes("Digital Gift Card")) return false;
   if (name.includes("Wallet Credit")) return false;
   return true;
@@ -113,6 +114,13 @@ function getElementsWithSingleClass(className) {
   return null;
 }
 
+function removeNonGames(games) {
+  const removeIfPresent = ["View Shipment Details", "Gift sent to"];
+  return games.filter(
+    (item) => !removeIfPresent.some((substring) => item.includes(substring))
+  );
+}
+
 function getPurchaseHistory() {
   const table = getElementsWithSingleClass("wallet_history_table");
   if (table) {
@@ -126,9 +134,18 @@ function getPurchaseHistory() {
       let total = cells[3]?.innerText.replace("$", "");
       if (total) total = parseFloat(total);
       if (allowEntry(name, type)) {
+        let games = name.replace("\nRefund", "").split("\n");
+        if (games.length > 1) {
+          console.log(games);
+        }
+        games = removeNonGames(games);
+        if (games.length > 1) {
+          console.log(games);
+        }
+        // removes non game names if gift was sent
         purchaseHistory.push({
           date,
-          games: name.replace("\nRefund", "").split("\n"),
+          games,
           type,
           total,
         });
@@ -255,12 +272,12 @@ function addCreateTableButton() {
   addBeforeElement(targetSelector, newButton);
 }
 
-function downloadAsJSON(object) {
-  if (!object) {
+function downloadAsJSON(purchaseData) {
+  if (!purchaseData.length) {
     alert("No data to download.");
     return;
   }
-  const jsonString = JSON.stringify(object, null, 2);
+  const jsonString = JSON.stringify(purchaseData, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
 
   const link = document.createElement("a");

@@ -6,6 +6,8 @@
     "test": "jest"
   },
   "devDependencies": {
-    "jest": "^29.7.0"
+    "@babel/preset-env": "^7.24.8",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
   }
 }

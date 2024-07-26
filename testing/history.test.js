@@ -2,24 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { allowEntry, removeNonGames } from "../src/index";
-
-// const allowEntry = require("../src/index.mjs");
-
-// function allowEntry(name, type) {
-//   if (!type || !name) return false;
-//   const allowedTypes = [
-//     "Purchase",`
-//     "Refund",
-//     "In-Game Purchase",
-//     "Gift Purchase",
-//   ];
-//   if (!allowedTypes.includes(type)) return false;
-//   // ignored due to funds being used later
-//   if (name.includes("Digital Gift Card")) return false;
-//   if (name.includes("Wallet Credit")) return false;
-//   return true;
-// }
+const { allowEntry, removeNonGames } = require("../src/index");
 
 describe("allowEntry function", () => {
   describe("allowed entries", () => {
@@ -27,7 +10,6 @@ describe("allowEntry function", () => {
       const name = "Example Game";
       const type = "Purchase";
       const allowed = allowEntry(name, type);
-      console.log("true", allowed);
       expect(allowed).toBeTruthy();
     });
 
@@ -35,7 +17,6 @@ describe("allowEntry function", () => {
       const name = "King Monster\nRefund";
       const type = "Refund";
       const allowed = allowEntry(name, type);
-      console.log("true", allowed);
       expect(allowed).toBeTruthy();
     });
 
@@ -43,7 +24,6 @@ describe("allowEntry function", () => {
       const name = "King Monster\nRefund";
       const type = "Refund";
       const allowed = allowEntry(name, type);
-      console.log("true", allowed);
       expect(allowed).toBeTruthy();
     });
 
@@ -51,7 +31,6 @@ describe("allowEntry function", () => {
       const name = "King Monster\nRefund";
       const type = "Refund";
       const allowed = allowEntry(name, type);
-      console.log("true", allowed);
       expect(allowed).toBeTruthy();
     });
   });
@@ -61,7 +40,6 @@ describe("allowEntry function", () => {
       const name = "Purchased $9.99 Digital Gift Card";
       const type = "Purchase";
       const allowed = allowEntry(name, type);
-      console.log("false", allowed);
       expect(allowed).toBeFalsy();
     });
 
@@ -69,18 +47,10 @@ describe("allowEntry function", () => {
       const name = "Purchased $5.00 Wallet Credit";
       const type = "Purchase";
       const allowed = allowEntry(name, type);
-      console.log("false", allowed);
       expect(allowed).toBeFalsy();
     });
   });
 });
-
-// function removeNonGames(games) {
-//   const removeIfPresent = ["View Shipment Details", "Gift sent to"];
-//   return games.filter(
-//     (item) => !removeIfPresent.some((substring) => item.includes(substring))
-//   );
-// }
 
 describe("removeNonGames function", () => {
   test("removes gift text", () => {

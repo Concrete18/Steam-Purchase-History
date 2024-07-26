@@ -32,7 +32,7 @@ function isDateWithinThisMonthAndYear(date) {
   ];
 }
 
-export function allowEntry(name, type) {
+function allowEntry(name, type) {
   if (!type || !name) return false;
   const allowedTypes = ["Purchase", "Refund", "Gift Purchase"];
   if (!allowedTypes.includes(type)) return false;
@@ -114,13 +114,14 @@ function getElementsWithSingleClass(className) {
   return null;
 }
 
-export function removeNonGames(games) {
+function removeNonGames(games) {
   const removeIfPresent = ["View Shipment Details", "Gift sent to"];
   return games.filter(
     (item) => !removeIfPresent.some((substring) => item.includes(substring))
   );
 }
 
+// gets steam purchase history as an array of objects
 function getPurchaseHistory() {
   const table = getElementsWithSingleClass("wallet_history_table");
   if (table) {
@@ -136,7 +137,6 @@ function getPurchaseHistory() {
       if (allowEntry(name, type)) {
         let games = name.replace("\nRefund", "").split("\n");
         games = removeNonGames(games);
-        // removes non game names if gift was sent
         purchaseHistory.push({
           date,
           games,
@@ -258,7 +258,7 @@ function addCreateTableButton() {
   });
   newButton.textContent = "Create Table";
   newButton.className = "btnv6_blue_hoverfade btn_medium";
-  newButton.style.padding = "8px";
+  newButton.style.padding = "7px 12px";
   newButton.style.marginBottom = "10px";
   newButton.style.marginRight = "10px";
 
@@ -286,11 +286,12 @@ function addDownloadPurchaseHistoryButton() {
   const newButton = document.createElement("button");
   newButton.addEventListener("click", () => {
     let purchaseHistory = getPurchaseHistory();
+    console.log(purchaseHistory);
     downloadAsJSON(purchaseHistory);
   });
   newButton.textContent = "Download Purchase History";
   newButton.className = "btnv6_blue_hoverfade btn_medium";
-  newButton.style.padding = "8px";
+  newButton.style.padding = "7px 12px";
   newButton.style.marginBottom = "10px";
   newButton.style.marginRight = "10px";
 
@@ -304,4 +305,11 @@ function addDownloadPurchaseHistoryButton() {
   expandHistory();
   addCreateTableButton();
   addDownloadPurchaseHistoryButton();
+
+  if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+      allowEntry,
+      removeNonGames,
+    };
+  }
 })();

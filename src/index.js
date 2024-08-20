@@ -2,6 +2,7 @@
 // @name        Steam Purchase History Checker
 // @namespace   https://michaele.us
 // @match       https://store.steampowered.com/account/history/
+// @icon        https://www.google.com/s2/favicons?sz=64&domain=store.steampowered.com
 // @grant       none
 // @version     1.0
 // @author      Concrete18

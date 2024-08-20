@@ -14,13 +14,9 @@ function expandHistory() {
   const loadMoreButton = document.getElementById("load_more_button");
   if (loadMoreButton) {
     if (loadMoreButton.style.display != "none") {
-      console.log("Button is visible");
       loadMoreButton.click();
-    } else {
-      console.log("Button is hidden");
     }
   }
-  console.log("No 'LOAD MORE TRANSACTIONS' button found");
 }
 
 // Checks if given date is from this month and year
@@ -219,15 +215,6 @@ function displayData(showOverall) {
   insertTableIntoPage(newTable);
 }
 
-function addAfterElement(targetSelector, newElement) {
-  const targetElement = document.querySelector(targetSelector);
-  if (targetElement) {
-    targetElement.appendChild(newElement);
-  } else {
-    console.log(`Element with selector "${targetSelector}" not found.`);
-  }
-}
-
 function addBeforeElement(targetSelector, newElement) {
   const targetElement = document.querySelector(targetSelector);
   if (targetElement) {
@@ -303,14 +290,24 @@ function addDownloadPurchaseHistoryButton() {
 (function () {
   "use strict";
 
-  expandHistory();
-  addCreateTableButton();
-  addDownloadPurchaseHistoryButton();
-
+  // exports for tests only when it can be
   if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
     module.exports = {
       allowEntry,
       removeNonGames,
     };
   }
+
+  // expands history every time the table finishes updates
+  const observer = new MutationObserver(() => {
+    expandHistory();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+
+  addCreateTableButton();
+  addDownloadPurchaseHistoryButton();
 })();

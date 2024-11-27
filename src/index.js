@@ -226,6 +226,7 @@ function addBeforeElement(targetSelector, newElement) {
 
 function addCreateTableButton() {
   const newButton = document.createElement("button");
+
   newButton.addEventListener("click", () => {
     const targetElement = document.querySelector(".purchase_count_table");
     if (targetElement) targetElement.remove();
@@ -244,6 +245,7 @@ function addCreateTableButton() {
 
     displayData(showOverall);
   });
+
   newButton.textContent = "Create Table";
   newButton.className = "btnv6_blue_hoverfade btn_medium";
   newButton.style.padding = "7px 12px";
@@ -308,6 +310,7 @@ function addDownloadPurchaseHistoryButton() {
     subtree: true,
   });
 
+  // TODO delay both functions if show more button is still displayed
   addCreateTableButton();
   addDownloadPurchaseHistoryButton();
 })();

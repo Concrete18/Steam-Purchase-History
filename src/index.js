@@ -68,6 +68,9 @@ function getHistoryTable(allDataShown) {
       let type = cells[2]?.innerText.split("\n")[0];
       let total = cells[3]?.innerText.replace("$", "");
       if (total) total = parseFloat(total);
+      if (!total) {
+        continue;
+      }
       let [thisMonth, thisYear] = isDateWithinThisMonthAndYear(date);
       if (allowEntry(name, type)) {
         if (type.includes("Purchase")) {
@@ -81,6 +84,7 @@ function getHistoryTable(allDataShown) {
             purchaseData.year.purchases += total;
           }
         } else {
+          // single game refunds from a group purchase can have missing refund data due to lack of info
           if (allDataShown) {
             purchaseData.overall.refunds += total;
           }
@@ -172,6 +176,7 @@ function createNewTable(data) {
 
   // Create data rows
   for (const period in data) {
+    console.log(data[period]);
     const row = document.createElement("tr");
 
     const periodCell = document.createElement("td");

@@ -166,7 +166,7 @@ function createNewTable(data) {
 
   // Create the header row
   const headerRow = document.createElement("tr");
-  const headers = ["Period", "Purchases", "Refunds"];
+  const headers = ["Period", "Purchases", "Refunds", "Total"];
   headers.forEach((headerText) => {
     const header = document.createElement("th");
     header.style.padding = padding;
@@ -200,6 +200,14 @@ function createNewTable(data) {
     refundsCell.style.fontSize = datFontSize;
     refundsCell.textContent = `+$${data[period].refunds.toFixed(2)}`;
     row.appendChild(refundsCell);
+
+    const totalCell = document.createElement("td");
+    totalCell.style.padding = padding;
+    totalCell.style.fontSize = datFontSize;
+    totalCell.textContent = `+$${
+      data[period].purchases.toFixed(2) - data[period].refunds.toFixed(2)
+    }`;
+    row.appendChild(totalCell);
 
     table.appendChild(row);
   }

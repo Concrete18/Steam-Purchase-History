@@ -21,15 +21,15 @@ describe("allowEntry function", () => {
     });
 
     test("allow In-Game Purchase", () => {
-      const name = "King Monster\nRefund";
-      const type = "Refund";
+      const name = "Key Jumper";
+      const type = "1000 Coins In-Game Purchase";
       const allowed = allowEntry(name, type);
       expect(allowed).toBeTruthy();
     });
 
     test("allow gift purchase", () => {
-      const name = "King Monster\nRefund";
-      const type = "Refund";
+      const name = "Turbo Racing";
+      const type = "Gift Purchase";
       const allowed = allowEntry(name, type);
       expect(allowed).toBeTruthy();
     });

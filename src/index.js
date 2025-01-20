@@ -31,9 +31,13 @@ function isDateWithinThisMonthAndYear(date) {
 
 function allowEntry(name, type) {
   if (!type || !name) return false;
+  // Check if the type includes any of the allowed types
   const allowedTypes = ["Purchase", "Refund", "Gift Purchase"];
-  if (!allowedTypes.includes(type)) return false;
-  // ignored due to funds being used later
+  const isAllowedType = allowedTypes.some((allowedType) =>
+    type.includes(allowedType)
+  );
+  if (!isAllowedType) return false;
+  // ignored since it adds to wallet credit
   if (name.includes("Digital Gift Card")) return false;
   if (name.includes("Wallet Credit")) return false;
   return true;

@@ -204,9 +204,9 @@ function createNewTable(data) {
     const totalCell = document.createElement("td");
     totalCell.style.padding = padding;
     totalCell.style.fontSize = datFontSize;
-    totalCell.textContent = `+$${
-      data[period].purchases.toFixed(2) - data[period].refunds.toFixed(2)
-    }`;
+    totalCell.textContent = `+$${(
+      data[period].purchases - data[period].refunds
+    ).toFixed(2)}`;
     row.appendChild(totalCell);
 
     table.appendChild(row);

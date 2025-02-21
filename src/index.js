@@ -6,7 +6,7 @@
 // @grant       none
 // @version     1.0
 // @author      Concrete18
-// @description 7/20/2024, 11:44:48 PM
+// @description This allows the creation of a table showing purchases, refund and net market value over the current month, year and overall time of the account. Refunding one game from a custom bundle will skew calculations.
 // ==/UserScript==
 
 // Expands view of purchase history by pressing the show more button
@@ -32,7 +32,12 @@ function isDateWithinThisMonthAndYear(date) {
 function allowEntry(name, type) {
   if (!type || !name) return false;
   // Check if the type includes any of the allowed types
-  const allowedTypes = ["Purchase", "Refund", "Gift Purchase"];
+  const allowedTypes = [
+    "Purchase",
+    "Refund",
+    "Gift Purchase",
+    "Market Transaction",
+  ];
   const isAllowedType = allowedTypes.some((allowedType) =>
     type.includes(allowedType)
   );
@@ -51,10 +56,12 @@ function getHistoryTable(allDataShown) {
       month: {
         purchases: 0,
         refunds: 0,
+        market: 0,
       },
       year: {
         purchases: 0,
         refunds: 0,
+        market: 0,
       },
     };
     // adds overall data if show more button is not shown
@@ -62,6 +69,7 @@ function getHistoryTable(allDataShown) {
       purchaseData["overall"] = {
         purchases: 0,
         refunds: 0,
+        market: 0,
       };
     }
     const rows = table.rows;
@@ -70,9 +78,16 @@ function getHistoryTable(allDataShown) {
       let date = cells[0]?.innerText;
       let name = cells[1]?.innerText;
       let type = cells[2]?.innerText.split("\n")[0];
+      // sets total
       let total = cells[3]?.innerText.replace("$", "");
-      if (total) total = parseFloat(total);
-      if (!total) {
+      let totalDivs = cells[3]?.querySelectorAll("div");
+
+      let credit =
+        totalDivs?.length >= 2 ? totalDivs[1].innerText.replace("$", "") : null;
+
+      if (total) {
+        total = parseFloat(total);
+      } else {
         continue;
       }
       let [thisMonth, thisYear] = isDateWithinThisMonthAndYear(date);
@@ -87,8 +102,30 @@ function getHistoryTable(allDataShown) {
           if (thisYear) {
             purchaseData.year.purchases += total;
           }
+        } else if (type.includes("Market")) {
+          if (allDataShown) {
+            if (credit) {
+              purchaseData.overall.market -= total;
+            } else {
+              purchaseData.overall.market += total;
+            }
+          }
+          if (thisMonth && thisYear) {
+            if (credit) {
+              purchaseData.month.market -= total;
+            } else {
+              purchaseData.month.market += total;
+            }
+          }
+          if (thisYear) {
+            if (credit) {
+              purchaseData.year.market -= total;
+            } else {
+              purchaseData.year.market += total;
+            }
+          }
         } else {
-          // single game refunds from a group purchase can have missing refund data due to lack of info
+          // single game refunds from a group purchase can have missing refund data due to lack of data in table
           if (allDataShown) {
             purchaseData.overall.refunds += total;
           }
@@ -101,6 +138,7 @@ function getHistoryTable(allDataShown) {
         }
       }
     }
+
     return purchaseData;
   } else {
     console.log("Table not found");
@@ -156,6 +194,13 @@ function getPurchaseHistory() {
   }
 }
 
+function formatNum(num) {
+  return num.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 // Function to create and return an HTML table element from the counts data
 function createNewTable(data) {
   const table = document.createElement("table");
@@ -166,7 +211,7 @@ function createNewTable(data) {
 
   // Create the header row
   const headerRow = document.createElement("tr");
-  const headers = ["Period", "Purchases", "Refunds", "Total"];
+  const headers = ["Period", "Purchases", "Refunds", "Market", "Total"];
   headers.forEach((headerText) => {
     const header = document.createElement("th");
     header.style.padding = padding;
@@ -180,7 +225,6 @@ function createNewTable(data) {
 
   // Create data rows
   for (const period in data) {
-    console.log(data[period]);
     const row = document.createElement("tr");
 
     const periodCell = document.createElement("td");
@@ -192,21 +236,33 @@ function createNewTable(data) {
     const purchasesCell = document.createElement("td");
     purchasesCell.style.padding = padding;
     purchasesCell.style.fontSize = datFontSize;
-    purchasesCell.textContent = `-$${data[period].purchases.toFixed(2)}`;
+    let purchasesNum = formatNum(data[period].purchases);
+    purchasesCell.textContent = `-$${purchasesNum}`;
     row.appendChild(purchasesCell);
 
     const refundsCell = document.createElement("td");
     refundsCell.style.padding = padding;
     refundsCell.style.fontSize = datFontSize;
-    refundsCell.textContent = `+$${data[period].refunds.toFixed(2)}`;
+    let refundNum = formatNum(data[period].refunds);
+    refundsCell.textContent = `+$${refundNum}`;
     row.appendChild(refundsCell);
+
+    const marketCell = document.createElement("td");
+    marketCell.style.padding = padding;
+    marketCell.style.fontSize = datFontSize;
+    let marketPolarity = data[period].market < 0 ? "+" : "-";
+    let marketNum = formatNum(Math.abs(data[period].market));
+    marketCell.textContent = `${marketPolarity}$${marketNum}`;
+    row.appendChild(marketCell);
 
     const totalCell = document.createElement("td");
     totalCell.style.padding = padding;
     totalCell.style.fontSize = datFontSize;
-    totalCell.textContent = `+$${(
-      data[period].purchases - data[period].refunds
-    ).toFixed(2)}`;
+    let totalNum =
+      data[period].purchases - data[period].refunds + data[period].market;
+    let totalPolarity = totalNum < 0 ? "+" : "-";
+    let formattedTotal = formatNum(Math.abs(totalNum));
+    totalCell.textContent = `${totalPolarity}$${formattedTotal}`;
     row.appendChild(totalCell);
 
     table.appendChild(row);
@@ -228,8 +284,11 @@ function insertTableIntoPage(table) {
 // Displays Purchase data based on month, year and entire history if it is all visible
 function displayData(showOverall) {
   const historyTable = getHistoryTable(showOverall);
+  console.log("retrieved purchase history");
   const newTable = createNewTable(historyTable);
+  console.log("created table");
   insertTableIntoPage(newTable);
+  console.log("inserted table");
 }
 
 function addBeforeElement(targetSelector, newElement) {
@@ -293,7 +352,6 @@ function addDownloadPurchaseHistoryButton() {
   const newButton = document.createElement("button");
   newButton.addEventListener("click", () => {
     let purchaseHistory = getPurchaseHistory();
-    console.log(purchaseHistory);
     downloadAsJSON(purchaseHistory);
   });
   newButton.textContent = "Download Purchase History";
@@ -326,8 +384,6 @@ function addDownloadPurchaseHistoryButton() {
     childList: true,
     subtree: true,
   });
-
-  // TODO delay both functions if show more button is still displayed
   addCreateTableButton();
   addDownloadPurchaseHistoryButton();
 })();

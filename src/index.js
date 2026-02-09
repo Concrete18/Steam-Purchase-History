@@ -4,7 +4,7 @@
 // @match       https://store.steampowered.com/account/history/
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=store.steampowered.com
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Concrete18
 // @description This allows the creation of a table showing purchases, refund and net market value over the current month, year and overall time of the account. Refunding one game from a custom bundle will skew calculations.
 // ==/UserScript==
@@ -29,15 +29,13 @@ function isDateWithinThisMonthAndYear(date) {
   ];
 }
 
-function allowEntry(name, type) {
+function includeEntry(name, type, keep_market = true) {
   if (!type || !name) return false;
   // Check if the type includes any of the allowed types
-  const allowedTypes = [
-    "Purchase",
-    "Refund",
-    "Gift Purchase",
-    "Market Transaction",
-  ];
+  const allowedTypes = ["Purchase", "Refund", "Gift Purchase"];
+  if (keep_market) {
+    allowedTypes.push("Market Transaction");
+  }
   const isAllowedType = allowedTypes.some((allowedType) =>
     type.includes(allowedType)
   );
@@ -91,7 +89,7 @@ function getHistoryTable(allDataShown) {
         continue;
       }
       let [thisMonth, thisYear] = isDateWithinThisMonthAndYear(date);
-      if (allowEntry(name, type)) {
+      if (includeEntry(name, type)) {
         if (type.includes("Purchase")) {
           if (allDataShown) {
             purchaseData.overall.purchases += total;
@@ -176,8 +174,11 @@ function getPurchaseHistory() {
       let name = cells[1]?.innerText;
       let type = cells[2]?.innerText.split("\n")[0];
       let total = cells[3]?.innerText.replace("$", "");
+      if (type == "Refund") {
+        total = total * -1;
+      }
       if (total) total = parseFloat(total);
-      if (allowEntry(name, type)) {
+      if (includeEntry(name, type)) {
         let games = name.replace("\nRefund", "").split("\n");
         games = removeNonGames(games);
         purchaseHistory.push({
@@ -370,7 +371,7 @@ function addDownloadPurchaseHistoryButton() {
   // exports for tests only when it can be
   if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
     module.exports = {
-      allowEntry,
+      includeEntry,
       removeNonGames,
     };
   }
